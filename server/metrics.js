@@ -278,15 +278,16 @@ export function fileStats(metricSet, pathId) {
   const removed = metricSet.file.removed[pathId];
   const churn = added + removed;
   const n = metricSet.file.modifications[pathId];
-  const size = metricSet.commitCount;
+  const inv = metricSet.commitCount > 0 ? 1 / metricSet.commitCount : 0;
   return {
     added,
     removed,
     growth: added - removed,
     churn,
     modifications: n,
-    modificationFrequency: size === 0 ? 0 : n / size,
-    churnRate: size === 0 ? 0 : churn / size,
+    // reference semantics: multiply by 1/|H| (not divide) — identical double result
+    modificationFrequency: n * inv,
+    churnRate: churn * inv,
   };
 }
 
@@ -295,15 +296,16 @@ export function dirStats(metricSet, dirId) {
   const removed = metricSet.dir.removed[dirId];
   const churn = added + removed;
   const n = metricSet.dir.modifications[dirId];
-  const size = metricSet.commitCount;
+  const inv = metricSet.commitCount > 0 ? 1 / metricSet.commitCount : 0;
   return {
     added,
     removed,
     growth: added - removed,
     churn,
     modifications: n,
-    modificationFrequency: size === 0 ? 0 : n / size,
-    churnRate: size === 0 ? 0 : churn / size,
+    // reference semantics: multiply by 1/|H| (not divide) — identical double result
+    modificationFrequency: n * inv,
+    churnRate: churn * inv,
   };
 }
 
@@ -334,7 +336,7 @@ export function authorBreakdown(index, metricSet, kind, objectId, authorGroups) 
       ownership: totalChurn === 0 ? 0 : churn / totalChurn,
     });
   }
-  rows.sort((x, y) => y.churn - x.churn || x.label.localeCompare(y.label));
+  rows.sort((x, y) => y.churn - x.churn || (x.label < y.label ? -1 : x.label > y.label ? 1 : 0));
   return rows;
 }
 

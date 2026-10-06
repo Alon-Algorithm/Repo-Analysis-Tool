@@ -68,8 +68,9 @@ test('repository-level metrics for the full set', () => {
   assert.equal(repo.growth, 17);
   assert.equal(repo.churn, 27);
   assert.equal(repo.modifications, 11); // empty commit, pure rename and binary-only commit modify nothing
-  assert.equal(repo.modificationFrequency, 11 / 14);
-  assert.equal(repo.churnRate, 27 / 14);
+  // reference arithmetic: multiply by 1/|H| (not divide)
+  assert.equal(repo.modificationFrequency, 11 * (1 / 14));
+  assert.equal(repo.churnRate, 27 * (1 / 14));
 });
 
 test('file metrics: renames, deletions, binary and empty files', () => {
@@ -77,7 +78,7 @@ test('file metrics: renames, deletions, binary and empty files', () => {
 
   assert.deepEqual(fileStats(metricSet, pid('a.txt')), {
     added: 6, removed: 1, growth: 5, churn: 7, modifications: 2,
-    modificationFrequency: 2 / 14, churnRate: 7 / 14,
+    modificationFrequency: 2 * (1 / 14), churnRate: 7 * (1 / 14),
   });
 
   // renamed away untouched: exists in the universe with all-zero metrics
