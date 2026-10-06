@@ -115,7 +115,7 @@ Commit-set metrics are summed/detected over the selected set `H` with
 
 ## AI Declaration
 
-*(To be completed before submission — list any AI tools used and how.)*
+*Qoder*
 
 ## License
 
