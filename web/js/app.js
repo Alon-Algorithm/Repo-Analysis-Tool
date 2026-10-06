@@ -10,6 +10,10 @@ import { clear, el, errorBox } from './ui.js';
 // Views are added here as they are implemented; the first one is the fallback.
 const VIEWS = [
   { id: 'overview', label: 'Overview', load: () => import('./views/overview.js') },
+  { id: 'tree', label: 'Tree', load: () => import('./views/tree.js') },
+  { id: 'file', label: 'File', load: () => import('./views/file.js') },
+  { id: 'commits', label: 'Commits', load: () => import('./views/commits.js') },
+  { id: 'authors', label: 'Authors', load: () => import('./views/authors.js') },
   { id: 'repos', label: 'Repositories', load: () => import('./views/repos.js') },
 ];
 
