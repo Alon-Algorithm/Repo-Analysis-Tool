@@ -54,7 +54,6 @@ test('zip ingest builds a correct repository index', async () => {
     'c.txt',
     'dir/c.txt',
     'dir/b.txt',
-    'bin.dat',
     'empty.txt',
     'naïve.txt',
     'sp ace.txt',
@@ -82,10 +81,10 @@ test('zip ingest builds a correct repository index', async () => {
   assert.equal(paths[changes.rn[renameRow]], 'c.txt');
   assert.equal(paths[changes.p[renameRow]], 'dir/c.txt');
 
-  // binary rows keep -1 counts but still enter the universe
-  const binRow = changes.p.findIndex((p) => paths[p] === 'bin.dat');
-  assert.equal(changes.a[binRow], -1);
-  assert.equal(changes.r[binRow], -1);
+  // binary rows are dropped entirely: no counts, and their paths stay out
+  // of the object universe (they are not measurable)
+  assert.ok(!paths.includes('bin.dat'));
+  assert.ok(changes.a.every((v) => v >= 0));
 
   // 8. the stored git directory is usable with --use-mailmap (bare semantics)
   const gitDir = store.repoGitDir(id);

@@ -73,7 +73,7 @@ test('repository-level metrics for the full set', () => {
   assert.equal(repo.churnRate, 27 * (1 / 14));
 });
 
-test('file metrics: renames, deletions, binary and empty files', () => {
+test('file metrics: renames, deletions and empty files', () => {
   const metricSet = computeMetrics(index, { include: allSet().include, authorGroups: groups });
 
   assert.deepEqual(fileStats(metricSet, pid('a.txt')), {
@@ -97,9 +97,8 @@ test('file metrics: renames, deletions, binary and empty files', () => {
   const deleted = fileStats(metricSet, pid('dir/b.txt'));
   assert.deepEqual([deleted.added, deleted.removed, deleted.modifications], [3, 3, 3]);
 
-  // binary file: in the universe, never measured
-  const binary = fileStats(metricSet, pid('bin.dat'));
-  assert.deepEqual([binary.added, binary.removed, binary.modifications], [0, 0, 0]);
+  // binary-only file: dropped at ingest, excluded from the object universe
+  assert.equal(pid('bin.dat'), -1);
 
   // empty file filled in one commit
   assert.deepEqual([fileStats(metricSet, pid('empty.txt')).added, fileStats(metricSet, pid('empty.txt')).modifications], [1, 1]);
@@ -209,7 +208,7 @@ test('tree drill-down lists children with metrics', () => {
   assert.deepEqual(root.dirs.map((d) => d.path), ['dir']);
   assert.deepEqual(
     root.files.map((f) => f.path),
-    ['.mailmap', 'a.txt', 'bin.dat', 'c.txt', 'empty.txt', 'naïve.txt', 'sp ace.txt'],
+    ['.mailmap', 'a.txt', 'c.txt', 'empty.txt', 'naïve.txt', 'sp ace.txt'],
   );
   const dirChildren = listChildren(index, metricSet, did('dir'));
   assert.deepEqual(dirChildren.files.map((f) => f.path), ['dir/b.txt', 'dir/c.txt']);

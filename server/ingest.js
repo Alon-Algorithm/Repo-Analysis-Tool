@@ -212,7 +212,7 @@ async function finalize(id, { name, source, previous, job }) {
  *   authors/rawAuthors: "Name <email>" strings (canonical / as written)
  *   paths: the object universe (every numstat path, in first-seen order)
  *   changes: { c[], p[], a[], r[], rn[] }       c: commit idx, p: path idx,
- *           a/r: added/removed (-1 = binary, not measured), rn: rename source idx (-1 = none)
+ *           a/r: added/removed counts (binary entries are dropped entirely), rn: rename source idx (-1 = none)
  */
 export async function buildIndex(gitDir, ref, { mailmapBlob = null, onTick } = {}) {
   const commits = { sha: [], ct: [], author: [], raw: [] };
@@ -251,11 +251,15 @@ export async function buildIndex(gitDir, ref, { mailmapBlob = null, onTick } = {
     },
     onEntry: (e) => {
       if (current < 0) throw new Error('numstat entry before any commit header');
+      // unmeasurable binary entries are dropped as a whole: they contribute no
+      // lines and their paths never enter the object universe, exactly like
+      // the reference exports treat them
+      if (e.added === null || e.removed === null) return;
       const p = intern(paths, pathIdx, e.path);
       changes.c.push(current);
       changes.p.push(p);
-      changes.a.push(e.added === null ? -1 : e.added);
-      changes.r.push(e.removed === null ? -1 : e.removed);
+      changes.a.push(e.added);
+      changes.r.push(e.removed);
       changes.rn.push(e.oldPath === null ? -1 : intern(paths, pathIdx, e.oldPath));
     },
   });
