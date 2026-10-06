@@ -9,6 +9,7 @@ import { clear, el, errorBox } from './ui.js';
 
 // Views are added here as they are implemented; the first one is the fallback.
 const VIEWS = [
+  { id: 'overview', label: 'Overview', load: () => import('./views/overview.js') },
   { id: 'repos', label: 'Repositories', load: () => import('./views/repos.js') },
 ];
 
