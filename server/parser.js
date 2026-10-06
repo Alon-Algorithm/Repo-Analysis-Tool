@@ -19,9 +19,15 @@
 const NUL = 0;
 const US = '\x1f';
 
-/** Arguments for the single extraction pass, parseable by GitLogParser. */
-export function logArgs(ref = 'HEAD') {
-  return [
+/**
+ * Arguments for the single extraction pass, parseable by GitLogParser.
+ * mailmapBlob: optional `<commit-ish>:.mailmap` source; when omitted git's
+ * default applies (worktree .mailmap, or HEAD:.mailmap for bare repositories).
+ */
+export function logArgs(ref = 'HEAD', { mailmapBlob = null } = {}) {
+  const args = [];
+  if (mailmapBlob) args.push('-c', `mailmap.blob=${mailmapBlob}:.mailmap`);
+  args.push(
     'log',
     '--no-merges', // H-bar: only non-merge commits
     '--use-mailmap', // %aN/%aE are canonical identities; %an/%ae stay raw
@@ -30,7 +36,8 @@ export function logArgs(ref = 'HEAD') {
     '-z',
     '--format=@@%H%x1f%P%x1f%ct%x1f%an%x1f%ae%x1f%aN%x1f%aE',
     ref,
-  ];
+  );
+  return args;
 }
 
 function parseCount(text, record) {

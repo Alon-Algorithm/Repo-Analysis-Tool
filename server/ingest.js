@@ -176,8 +176,10 @@ async function finalize(id, { name, source, previous, job }) {
   job.percent = 0;
   job.commits = 0;
   job.detail = '';
-  const index = await buildIndex(gitDir, 'HEAD', (n) => {
-    job.commits = n;
+  const index = await buildIndex(gitDir, 'HEAD', {
+    onTick: (n) => {
+      job.commits = n;
+    },
   });
 
   job.phase = 'indexing';
@@ -202,6 +204,9 @@ async function finalize(id, { name, source, previous, job }) {
 
 /**
  * Single extraction pass -> flat index arrays.
+ * options.mailmapBlob: read identities from `<ref>:.mailmap` instead of the
+ * default source (used to reproduce historical exports exactly).
+ * options.onTick(n): called periodically with the commit count parsed so far.
  *
  *   commits: { sha[], ct[], author[], raw[] }   author: canonical identity idx
  *   authors/rawAuthors: "Name <email>" strings (canonical / as written)
@@ -209,7 +214,7 @@ async function finalize(id, { name, source, previous, job }) {
  *   changes: { c[], p[], a[], r[], rn[] }       c: commit idx, p: path idx,
  *           a/r: added/removed (-1 = binary, not measured), rn: rename source idx (-1 = none)
  */
-export async function buildIndex(gitDir, ref, onCommitTick) {
+export async function buildIndex(gitDir, ref, { mailmapBlob = null, onTick } = {}) {
   const commits = { sha: [], ct: [], author: [], raw: [] };
   const authors = [];
   const rawAuthors = [];
@@ -241,7 +246,7 @@ export async function buildIndex(gitDir, ref, onCommitTick) {
       commits.raw.push(intern(rawAuthors, rawIdx, `${c.an} <${c.ae}>`));
       if (++sinceTick >= 5000) {
         sinceTick = 0;
-        if (onCommitTick) onCommitTick(commits.sha.length);
+        if (onTick) onTick(commits.sha.length);
       }
     },
     onEntry: (e) => {
@@ -255,9 +260,9 @@ export async function buildIndex(gitDir, ref, onCommitTick) {
     },
   });
 
-  await streamGit(['-C', gitDir, ...logArgs(ref)], { onStdout: (chunk) => parser.push(chunk) });
+  await streamGit(['-C', gitDir, ...logArgs(ref, { mailmapBlob })], { onStdout: (chunk) => parser.push(chunk) });
   parser.end();
-  if (onCommitTick) onCommitTick(commits.sha.length);
+  if (onTick) onTick(commits.sha.length);
 
   return {
     version: 1,
