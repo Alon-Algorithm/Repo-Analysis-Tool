@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Repo Analysis Tool</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">RAT</span> Repo Analysis Tool</div>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="repo-select" id="repo-select"></div>
+  </header>
+
+  <section class="filterbar" id="filterbar"></section>
+
+  <main class="view" id="view"></main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/vendor/echarts.min.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
