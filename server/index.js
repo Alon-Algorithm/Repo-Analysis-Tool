@@ -136,12 +136,12 @@ async function serveStatic(req, res, pathname) {
     throw new HttpError(404, 'not found');
   }
   const ext = extname(target);
-  // code and markup are revalidated on every load: a dashboard left open
-  // across an update must never keep running yesterday's modules
+  // code and markup are never stored by the browser: a dashboard left open
+  // across an update must never keep running stale modules or styling
   const revalidate = ext === '.html' || ext === '.js' || ext === '.mjs' || ext === '.css';
   res.writeHead(200, {
     'content-type': MIME[ext] ?? 'application/octet-stream',
-    'cache-control': revalidate ? 'no-cache' : 'public, max-age=3600',
+    'cache-control': revalidate ? 'no-store' : 'public, max-age=3600',
   });
   await pipeline(createReadStream(target), res).catch(() => {}); // client aborts are fine
 }
