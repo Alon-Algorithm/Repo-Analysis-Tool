@@ -79,6 +79,56 @@ export function ownershipBar(value) {
   );
 }
 
+/** Author breakdown table shared by the metric views. */
+export function authorsTable(rows) {
+  return el('div', { class: 'table-wrap' },
+    el('table', { class: 'data' },
+      el('thead', {},
+        el('tr', {},
+          el('th', { text: 'Author' }),
+          el('th', { text: 'Added' }),
+          el('th', { text: 'Removed' }),
+          el('th', { text: 'Churn' }),
+          el('th', { text: 'Modifications' }),
+          el('th', { text: 'Ownership' }),
+        ),
+      ),
+      el('tbody', {},
+        rows.map((row) => el('tr', {},
+          el('td', { text: row.label }),
+          el('td', { class: 'pos nowrap', text: `+${fmtInt(row.added)}` }),
+          el('td', { class: 'neg nowrap', text: `−${fmtInt(row.removed)}` }),
+          el('td', { class: 'nowrap', text: fmtInt(row.churn) }),
+          el('td', { class: 'nowrap', text: fmtInt(row.modifications) }),
+          el('td', {}, ownershipBar(row.ownership)),
+        )),
+      ),
+    ),
+  );
+}
+
+/** Directory part of a repository path ('' for top-level files). */
+export const dirname = (path) => {
+  const cut = String(path).lastIndexOf('/');
+  return cut < 0 ? '' : String(path).slice(0, cut);
+};
+
+/** The metric cards shared by the repository, directory and file views. */
+export function statsGrid(stats, opts = {}) {
+  const cards = [];
+  if (opts.commits !== undefined) cards.push(statCard('Commits', fmtInt(opts.commits), 'non-merge, active set'));
+  cards.push(
+    statCard('Lines added', fmtInt(stats.added)),
+    statCard('Lines removed', fmtInt(stats.removed)),
+    statCard('Growth', fmtInt(stats.growth), 'added − removed'),
+    statCard('Churn', fmtInt(stats.churn), 'added + removed'),
+    statCard('Modifications', fmtInt(stats.modifications), 'commits touching it'),
+    statCard('Modification frequency', fmtNum(stats.modificationFrequency, 4), 'per commit'),
+    statCard('Churn rate', fmtNum(stats.churnRate, 4), 'churn per commit'),
+  );
+  return el('div', { class: 'grid stats', style: 'margin-top:12px' }, ...cards);
+}
+
 let toastTimer = null;
 export function toast(message, kind = 'info', ms = 3200) {
   const node = document.getElementById('toast');

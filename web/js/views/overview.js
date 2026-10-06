@@ -7,7 +7,7 @@
 import { api } from '../api.js';
 import { AXIS, C, LEGEND, TOOLTIP, mountChart } from '../charts.js';
 import { emit, filterParams, state } from '../state.js';
-import { commitSetLabel, el, fmtInt, fmtNum, ownershipBar, panel, statCard } from '../ui.js';
+import { commitSetLabel, authorsTable, el, fmtNum, panel, statsGrid } from '../ui.js';
 
 const BUCKETS = [['day', 'Day'], ['week', 'Week'], ['month', 'Month']];
 const TOP_CHART_AUTHORS = 12;
@@ -53,33 +53,6 @@ function authorsOption(rows) {
   };
 }
 
-function authorsTable(rows) {
-  return el('div', { class: 'table-wrap' },
-    el('table', { class: 'data' },
-      el('thead', {},
-        el('tr', {},
-          el('th', { text: 'Author' }),
-          el('th', { text: 'Added' }),
-          el('th', { text: 'Removed' }),
-          el('th', { text: 'Churn' }),
-          el('th', { text: 'Modifications' }),
-          el('th', { text: 'Ownership' }),
-        ),
-      ),
-      el('tbody', {},
-        rows.map((row) => el('tr', {},
-          el('td', { text: row.label }),
-          el('td', { class: 'pos nowrap', text: `+${fmtInt(row.added)}` }),
-          el('td', { class: 'neg nowrap', text: `−${fmtInt(row.removed)}` }),
-          el('td', { class: 'nowrap', text: fmtInt(row.churn) }),
-          el('td', { class: 'nowrap', text: fmtInt(row.modifications) }),
-          el('td', {}, ownershipBar(row.ownership)),
-        )),
-      ),
-    ),
-  );
-}
-
 export async function render() {
   if (!state.repoId) return el('div', { class: 'empty' }, 'Select a repository first.');
 
@@ -94,16 +67,7 @@ export async function render() {
 
   wrap.append(
     el('div', { class: 'chip-row' }, el('div', { class: 'chip', text: commitSetLabel(commitSet) })),
-    el('div', { class: 'grid stats', style: 'margin-top:12px' },
-      statCard('Commits', fmtInt(commitSet.count), 'non-merge, active set'),
-      statCard('Lines added', fmtInt(stats.added)),
-      statCard('Lines removed', fmtInt(stats.removed)),
-      statCard('Growth', fmtInt(stats.growth), 'added − removed'),
-      statCard('Churn', fmtInt(stats.churn), 'added + removed'),
-      statCard('Modifications', fmtInt(stats.modifications), 'commits touching it'),
-      statCard('Modification frequency', fmtNum(stats.modificationFrequency, 4), 'per commit'),
-      statCard('Churn rate', fmtNum(stats.churnRate, 4), 'churn per commit'),
-    ),
+    statsGrid(stats, { commits: commitSet.count }),
   );
 
   const bucketButtons = el('div', { class: 'chip-row' });
