@@ -326,6 +326,9 @@ td.path .link:hover { text-decoration: underline; }
 .muted { color: var(--muted); }
 .nowrap { white-space: nowrap; }
 
+.link { color: var(--accent); cursor: pointer; }
+.link:hover { text-decoration: underline; }
+
 /* ownership bar */
 .obar { display: flex; align-items: center; gap: 8px; min-width: 130px; }
 .obar .track { flex: 1; height: 6px; background: #edf0f4; border-radius: 6px; overflow: hidden; }
