@@ -46,6 +46,30 @@ export function statCard(label, value, hint) {
   );
 }
 
+/** Titled section: panel({ title, sub, right }, ...body). */
+export function panel({ title, sub, right }, ...body) {
+  return el('section', { class: 'panel' },
+    el('div', { class: 'panel-head' },
+      el('h2', { text: title }),
+      sub ? el('span', { class: 'sub', text: sub }) : null,
+      right ? el('span', { style: 'margin-left:auto' }, right) : null,
+    ),
+    ...body,
+  );
+}
+
+/** Human summary of the active commit set, e.g. "range 2024-01-01 → 2024-06-01 · 123 commits". */
+export function commitSetLabel(set) {
+  let scope = 'all commits';
+  if (set.kind === 'range') {
+    scope = `range ${set.from ? fmtDate(set.from) : 'start'} → ${set.to ? fmtDate(set.to) : 'end'}`;
+  } else if (set.kind === 'list') {
+    scope = 'selected commits';
+  }
+  const author = set.authorFilter ? ` · author: ${set.authorFilter}` : '';
+  return `${scope} · ${fmtInt(set.count)} commits${author}`;
+}
+
 /** Ownership bar: <div class="obar"><track><fill/></track><pct/></div> */
 export function ownershipBar(value) {
   const pct = Math.max(0, Math.min(1, Number(value) || 0));
