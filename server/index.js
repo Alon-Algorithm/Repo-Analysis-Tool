@@ -51,7 +51,7 @@ import {
 } from './query.js';
 import * as store from './store.js';
 
-const PUBLIC_DIR = join(store.ROOT, 'public');
+const WEB_DIR = join(store.ROOT, 'web');
 const MAX_JSON_BODY = 1 << 20; // 1 MiB
 const MAX_UPLOAD = Number(process.env.RAT_MAX_UPLOAD ?? 1 << 30); // 1 GiB
 
@@ -121,8 +121,8 @@ async function serveStatic(req, res, pathname) {
     throw new HttpError(400, 'malformed URL encoding');
   }
   if (rel.endsWith('/')) rel += 'index.html';
-  const file = normalize(join(PUBLIC_DIR, rel));
-  if (file !== PUBLIC_DIR && !file.startsWith(PUBLIC_DIR + sep)) {
+  const file = normalize(join(WEB_DIR, rel));
+  if (file !== WEB_DIR && !file.startsWith(WEB_DIR + sep)) {
     throw new HttpError(403, 'forbidden');
   }
   let target = file;
